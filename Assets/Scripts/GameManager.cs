@@ -6,6 +6,9 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
+    //Constants
+    [SerializeField] private const int NUMBER_OF_YEARS_TO_WIN = 20;
+
     //a public integer that holds the turn count
     public static int turnCount;
     public static int currentFund;
@@ -17,6 +20,33 @@ public class GameManager : MonoBehaviour
     public static bool playerChoosenLoans; 
     public static bool playerChoosenInvest;
 
+    public int baseValue; //used for calculating math values
+
+    //Handles UI
+    public TextMeshProUGUI smallLoanMoneyToReceiveDisplay;
+    public TextMeshProUGUI smallLoanQuarterlyCostToIncreaseDisplay;
+    public TextMeshProUGUI mediumLoanMoneyToReceiveDisplay;
+    public TextMeshProUGUI mediumLoanQuarterlyCostToIncreaseDisplay;
+    public TextMeshProUGUI largeLoanMoneyToReceiveDisplay;
+    public TextMeshProUGUI largeLoanQuarterlyCostToIncreaseDisplay;
+
+    public TextMeshProUGUI smallInvestMoneyToInvestDisplay;
+    public TextMeshProUGUI smallInvestMoneyToReceiveDisplay;
+    public TextMeshProUGUI mediumInvestMoneyToInvestDisplay;
+    public TextMeshProUGUI mediumInvestMoneyToReceiveDisplay;
+    public TextMeshProUGUI largeInvestMoneyToInvestDisplay;
+    public TextMeshProUGUI largeInvestMoneyToReceiveDisplay;
+
+    public TextMeshProUGUI choiceDisplay;
+    public TextMeshProUGUI moneyMadeDisplay;
+    public TextMeshProUGUI moneyLostDisplay;
+    public TextMeshProUGUI nextChoiceDisplay;
+
+    //Handles storing money to invest
+    public int smallInvestMoneyToInvest;
+    public int mediumInvestMoneyToInvest;
+    public int largeInvestMoneyToInvest;
+
     //handles preventing player from taking infinite loans;
     int loanCooldown = 3;
     int lCTimer = 0; //loan cooldown timer
@@ -25,30 +55,36 @@ public class GameManager : MonoBehaviour
     //stores the pop ups
     public GameObject loanPopUp;
     public GameObject investmentPopUp;
-    public static GameObject warnPopup;
+    public GameObject warnPopup;
+    public GameObject winScreen;
 
 
     void Start()
     {
-        currentFund = 1000;
         turnCount = 1;
+
+        currentFund = 1000;
         currentLost = 100;
+
         playerChoosenInvest = false;
         playerChoosenLoans = false;
         playerChooseOption = false;
         canChooseLoan = true;
-        warnPopup = GameObject.Find("WarnPopup");
+
+        winScreen.SetActive(false);
         warnPopup.SetActive(false);
         loanPopUp.SetActive(false);
         investmentPopUp.SetActive(false);
         loanChoice = 0;
         investChoice = 0;
-    }
 
-   
-    void Update()
-    {
-        
+        choiceDisplay.gameObject.SetActive(false);
+        moneyMadeDisplay.gameObject.SetActive(false);
+        moneyLostDisplay.gameObject.SetActive(false);
+        nextChoiceDisplay.gameObject.SetActive(false);
+
+        CalculateLoanChances();
+        CalculateInvestmentChances();
     }
 
     public void ChoosenLoans() 
@@ -74,6 +110,32 @@ public class GameManager : MonoBehaviour
         playerChoosenLoans = false;
         playerChoosenInvest = true;
         loanChoice = 0;        
+    }
+
+    public void CalculateLoanChances()
+    {
+        int minSmallLoanGain = (currentFund/2) + ( (currentFund/100) * -10);
+        int maxSmallLoanGain = (currentFund/2) + ( (currentFund/100) * 10);
+        int minSmallQuarterlyCostToIncrease = minSmallLoanGain/20;
+        int maxSmallQuarterlyCostToIncrease = maxSmallLoanGain/20;
+
+        int minMediumLoanGain = (currentFund/2) + ( (currentFund/25) * -10);
+        int maxMediumLoanGain = (currentFund/2) + ( (currentFund/25) * 10);
+        int minMediumQuarterlyCostToIncrease = minMediumLoanGain/10;
+        int maxMediumQuarterlyCostToIncrease = maxMediumLoanGain/10;
+    
+        int minLargeLoanGain = (currentFund/2) + ( (currentFund/5) * -5);
+        int maxLargeLoanGain = (currentFund/2) + ( (currentFund/5) * 5);
+        int minLargeQuarterlyCostToIncrease = minLargeLoanGain/4;
+        int maxLargeQuarterlyCostToIncrease = maxLargeLoanGain/4;
+
+        smallLoanMoneyToReceiveDisplay.text = "Money to Receive: $" + minSmallLoanGain.ToString() + " to $" + maxSmallLoanGain.ToString();
+        mediumLoanMoneyToReceiveDisplay.text = "Money to Receive: $" + minMediumLoanGain.ToString() + " to $" + maxMediumLoanGain.ToString();
+        largeLoanMoneyToReceiveDisplay.text = "Money to Receive: $" + minLargeLoanGain.ToString() + " to $" + maxLargeLoanGain.ToString();
+
+        smallLoanQuarterlyCostToIncreaseDisplay.text = "Quarterly Cost to Increase: $" + minSmallQuarterlyCostToIncrease.ToString() + " to $" + maxSmallQuarterlyCostToIncrease.ToString();
+        mediumLoanQuarterlyCostToIncreaseDisplay.text = "Quarterly Cost to Increase: $" + minMediumQuarterlyCostToIncrease.ToString() + " to $" + maxMediumQuarterlyCostToIncrease.ToString();
+        largeLoanQuarterlyCostToIncreaseDisplay.text = "Quarterly Cost to Increase: $" + minLargeQuarterlyCostToIncrease.ToString() + " to $" + maxLargeQuarterlyCostToIncrease.ToString();
     }
 
     //Handles the math for the amount of money gained/lossed.
@@ -102,18 +164,41 @@ public class GameManager : MonoBehaviour
         //choice 3 -high money
         if (loanChoice == 3)
         {
-            randFactor = Random.Range(-5,6); //picks random int from between -10 and 10
+            randFactor = Random.Range(-5,6); //picks random int from between -5 and 5
             moneyToRecieve = (currentFund/2) + ( (currentFund/5) * randFactor);
             quarterlyCostToIncrease = moneyToRecieve/4;
         }
         currentFund += moneyToRecieve;
         currentLost += quarterlyCostToIncrease;
 
-        Debug.Log("Player made: " + moneyToRecieve + "; Player quarter cost increase: " + quarterlyCostToIncrease);
+        moneyMadeDisplay.text = "Made: $"+moneyToRecieve.ToString();
+        moneyLostDisplay.text = "Quarter Increase: $"+quarterlyCostToIncrease.ToString();
 
         //turns on loan cooldown
         canChooseLoan = false;
+
     }
+
+    public void CalculateInvestmentChances() {
+        int baseValue = 50 + turnCount * (Random.Range(1, 7)) + (currentLost/150); //value is modified by turnCount * + or - 5%
+
+        int smallInvestMoneyToInvest = baseValue/2;
+        int mediumInvestMoneyToInvest = baseValue * 15;
+        int largeInvestMoneyToInvest = baseValue * 50;
+
+        int maxSmallInvestMoneyToReceive = baseValue * 6;
+        int maxMediumInvestMoneyToReceive = baseValue * (19 + 12);
+        int maxLargeInvestMoneyToReceive = baseValue * (65 + 16);
+
+        smallInvestMoneyToInvestDisplay.text = "Investment Cost: $" + smallInvestMoneyToInvest.ToString();
+        mediumInvestMoneyToInvestDisplay.text = "Investment Cost: $" + mediumInvestMoneyToInvest.ToString();
+        largeInvestMoneyToInvestDisplay.text = "Investment Cost: $" + largeInvestMoneyToInvest.ToString();
+
+        smallInvestMoneyToReceiveDisplay.text = "Highest Returns: $" + maxSmallInvestMoneyToReceive.ToString();
+        mediumInvestMoneyToReceiveDisplay.text = "Highest Returns: $" + maxMediumInvestMoneyToReceive.ToString();
+        largeInvestMoneyToReceiveDisplay.text = "Highest Returns: $" + maxLargeInvestMoneyToReceive.ToString();
+    }
+
     //Handles the math for the amount of money gained/lossed.
     public void CalculatingInvestment()
     {
@@ -131,22 +216,22 @@ public class GameManager : MonoBehaviour
             randChoice = Random.Range(1,101); //determines at random which of the choices appear
             if (randChoice <= 90) //90% of the time
             {
-            //choice 1.1 - low money invested, low returns, completely safe (100% returns)
-            moneyToInvest = baseValue / 2;
-            moneyToRecieve = baseValue * Random.Range(1,4);
+                //choice 1.1 - low money invested, low returns, completely safe (100% returns)
+                moneyToInvest = baseValue / 2;
+                moneyToRecieve = baseValue * Random.Range(1,4);
 
             }
             else //10% of the time
             {
-            //choice 1.2 - low money invested, modest returns, mostly safe (90% returns)
-            moneyToInvest = baseValue / 2;
-            randFactor = Random.Range(1,101);
-                if (randFactor <= 90) {
-                    moneyToRecieve = baseValue * Random.Range(3,6);
-                }
-                else {
-                    moneyToRecieve = 0;
-                }
+                //choice 1.2 - low money invested, modest returns, mostly safe (90% returns)
+                moneyToInvest = baseValue / 2;
+                randFactor = Random.Range(1,101);
+                    if (randFactor <= 90) {
+                        moneyToRecieve = baseValue * Random.Range(3,6);
+                    }
+                    else {
+                        moneyToRecieve = 0;
+                    }
             }
         }
 
@@ -165,7 +250,7 @@ public class GameManager : MonoBehaviour
             }
             else // 20% of the time
             {
-                 moneyToRecieve = baseValue * (19 + Random.Range(1,12));
+                moneyToRecieve = baseValue * (19 + Random.Range(1,12));
             }
             
         }
@@ -192,7 +277,8 @@ public class GameManager : MonoBehaviour
         currentFund -= moneyToInvest;
         currentFund += moneyToRecieve;
 
-        Debug.Log("Player spent: " + moneyToInvest + "; Player recieved: " + moneyToRecieve); 
+        moneyMadeDisplay.text = "Spent: $"+moneyToInvest.ToString();
+        moneyLostDisplay.text = "Received: $"+moneyToRecieve.ToString();
     }
 
     //methods that reveals the pop up menus
@@ -251,44 +337,75 @@ public class GameManager : MonoBehaviour
     */
     public void ChooseOptionOne()
     {
+        nextChoiceDisplay.gameObject.SetActive(true);
         if (loanPopUp.activeSelf)
         {
-        loanChoice = 1;
-        ChoosenLoans();
+            loanChoice = 1;
+            nextChoiceDisplay.text = "You plan to take out a small loan.";
+            ChoosenLoans();
         }
 
         else
         {
-        investChoice = 1;
-        ChoosenInvest();
+            investChoice = 1;
+            if (currentFund < smallInvestMoneyToInvest) //if we lack the funds to make the payment...
+            {
+                StartCoroutine(Popup(2.0f, "You lack the funds to make this investment!"));
+            }
+            else //Otherwise, its a valid selection
+            {
+            nextChoiceDisplay.text = "You plan to make a small investment.";
+            ChoosenInvest();
+            }
         }
     }
+    
     public void ChooseOptionTwo()
     {
+        nextChoiceDisplay.gameObject.SetActive(true);
         if (loanPopUp.activeSelf)
         {
-        loanChoice = 2;
-        ChoosenLoans();
+            loanChoice = 2;
+            nextChoiceDisplay.text = "You plan to take out a medium sized loan.";
+            ChoosenLoans();
         }
 
         else
         {
-        investChoice = 2;
-        ChoosenInvest();
+            investChoice = 2;
+            if (currentFund < mediumInvestMoneyToInvest)
+            {
+                StartCoroutine(Popup(2.0f, "You lack the funds to make this investment!"));
+            }
+            else
+            {
+            nextChoiceDisplay.text = "You plan to make a medium sized investment.";
+            ChoosenInvest();
+            }
         }
     }
     public void ChooseOptionThree()
     {
+        nextChoiceDisplay.gameObject.SetActive(true);
         if (loanPopUp.activeSelf)
         {
         loanChoice = 3;
+        nextChoiceDisplay.text = "You plan to take out a large loan.";
         ChoosenLoans();
         }
 
         else
         {
-        investChoice = 3;
-        ChoosenInvest();
+            investChoice = 3;
+            if (currentFund < largeInvestMoneyToInvest)
+            {
+                StartCoroutine(Popup(2.0f, "You lack the funds to make this investment!"));
+            }
+            else
+            {
+                nextChoiceDisplay.text = "You plan to make a large investment.";
+                ChoosenInvest();
+            }
         }
 
     }    
@@ -298,36 +415,54 @@ public class GameManager : MonoBehaviour
     {
         if (playerChooseOption == true) //if player chose something...
         {
+            choiceDisplay.gameObject.SetActive(true);
+            moneyMadeDisplay.gameObject.SetActive(true);
+            moneyLostDisplay.gameObject.SetActive(true);
+            nextChoiceDisplay.gameObject.SetActive(false);
+
             Debug.Log("Player made a choice.");
             if (playerChoosenLoans)
             {
-                Debug.Log("Player choose to take a loan.");
+                choiceDisplay.text = "You just took out a loan.";                
                 CalculatingLoan();
             }
             if (playerChoosenInvest)
             {
-                Debug.Log("Player choose to make an investment.");
+                choiceDisplay.text = "You just made an investment.";
                 CalculatingInvestment();
             }
 
-        playerChoosenInvest = false;
-        playerChoosenLoans = false;
-        playerChooseOption = false;
+            playerChoosenInvest = false;
+            playerChoosenLoans = false;
+            playerChooseOption = false;
 
-        if (canChooseLoan == false)
-        {
-            lCTimer++;
-            if (lCTimer >= loanCooldown)
+            if (canChooseLoan == false)
             {
-                canChooseLoan = true;
-                lCTimer = 0;
+                lCTimer++;
+                if (lCTimer >= loanCooldown)
+                {
+                    canChooseLoan = true;
+                    lCTimer = 0;
+                }
             }
-        }
 
 
-        currentFund = currentFund - currentLost;
-        loanChoice = 0;
-        turnCount++;
+            currentFund = currentFund - currentLost;
+            loanChoice = 0;
+            turnCount++;
+
+            //if we have made it to turn 80... pop up win screen!
+            if (turnCount%(NUMBER_OF_YEARS_TO_WIN*4)==0)
+            {
+                winScreen.SetActive(true);
+            }
+
+            //if our money is reduced to 0, we lose.
+            if (currentFund <= 0) {
+                print("You ran out of money!");
+                //loseScreen.SetActive(true);
+            }
+            //TODO: add the lose condition and popup toggle.
         }
         else
         {
@@ -337,7 +472,7 @@ public class GameManager : MonoBehaviour
     }
 
     //static method to display the warning popup, with a text of our desire, for a specified number of seconds.
-    public static IEnumerator Popup(float secsToShow, string textToDisplay)
+    public IEnumerator Popup(float secsToShow, string textToDisplay)
     {
         warnPopup.SetActive(true);
         warnPopup.GetComponent<TextMeshProUGUI>().text = string.Format(textToDisplay);
