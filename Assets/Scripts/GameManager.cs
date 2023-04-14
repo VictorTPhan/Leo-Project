@@ -57,6 +57,7 @@ public class GameManager : MonoBehaviour
     public GameObject investmentPopUp;
     public GameObject warnPopup;
     public GameObject winScreen;
+    public GameObject loseScreen;
 
 
     void Start()
@@ -72,6 +73,7 @@ public class GameManager : MonoBehaviour
         canChooseLoan = true;
 
         winScreen.SetActive(false);
+        loseScreen.SetActive(false);
         warnPopup.SetActive(false);
         loanPopUp.SetActive(false);
         investmentPopUp.SetActive(false);
@@ -182,9 +184,9 @@ public class GameManager : MonoBehaviour
     public void CalculateInvestmentChances() {
         int baseValue = 50 + turnCount * (Random.Range(1, 7)) + (currentLost/150); //value is modified by turnCount * + or - 5%
 
-        int smallInvestMoneyToInvest = baseValue/2;
-        int mediumInvestMoneyToInvest = baseValue * 15;
-        int largeInvestMoneyToInvest = baseValue * 50;
+        smallInvestMoneyToInvest = baseValue/2;
+        mediumInvestMoneyToInvest = baseValue * 15;
+        largeInvestMoneyToInvest = baseValue * 50;
 
         int maxSmallInvestMoneyToReceive = baseValue * 6;
         int maxMediumInvestMoneyToReceive = baseValue * (19 + 12);
@@ -458,11 +460,11 @@ public class GameManager : MonoBehaviour
             }
 
             //if our money is reduced to 0, we lose.
-            if (currentFund <= 0) {
-                print("You ran out of money!");
-                //loseScreen.SetActive(true);
+            if (currentFund <= 0) 
+            {
+                loseScreen.SetActive(true);
             }
-            //TODO: add the lose condition and popup toggle.
+
         }
         else
         {
