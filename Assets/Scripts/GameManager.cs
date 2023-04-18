@@ -22,6 +22,8 @@ public class GameManager : MonoBehaviour
 
     public int baseValue; //used for calculating math values
 
+    public int randModifier;
+
     //Handles UI
     public TextMeshProUGUI smallLoanMoneyToReceiveDisplay;
     public TextMeshProUGUI smallLoanQuarterlyCostToIncreaseDisplay;
@@ -79,6 +81,7 @@ public class GameManager : MonoBehaviour
         investmentPopUp.SetActive(false);
         loanChoice = 0;
         investChoice = 0;
+        randModifier = 0;
 
         choiceDisplay.gameObject.SetActive(false);
         moneyMadeDisplay.gameObject.SetActive(false);
@@ -116,20 +119,20 @@ public class GameManager : MonoBehaviour
 
     public void CalculateLoanChances()
     {
-        int minSmallLoanGain = (currentFund/2) + ( (currentFund/100) * -10);
-        int maxSmallLoanGain = (currentFund/2) + ( (currentFund/100) * 10);
-        int minSmallQuarterlyCostToIncrease = minSmallLoanGain/20;
-        int maxSmallQuarterlyCostToIncrease = maxSmallLoanGain/20;
+        int minSmallLoanGain = (currentFund/2) + ( (currentFund/100) * 0);
+        int maxSmallLoanGain = (currentFund/2) + ( (currentFund/100) * 11);
+        int minSmallQuarterlyCostToIncrease = minSmallLoanGain/30;
+        int maxSmallQuarterlyCostToIncrease = maxSmallLoanGain/30;
 
-        int minMediumLoanGain = (currentFund/2) + ( (currentFund/25) * -10);
-        int maxMediumLoanGain = (currentFund/2) + ( (currentFund/25) * 10);
-        int minMediumQuarterlyCostToIncrease = minMediumLoanGain/10;
-        int maxMediumQuarterlyCostToIncrease = maxMediumLoanGain/10;
+        int minMediumLoanGain = (currentFund/2) + ( (currentFund/25) * 10);
+        int maxMediumLoanGain = (currentFund/2) + ( (currentFund/25) * 20);
+        int minMediumQuarterlyCostToIncrease = minMediumLoanGain/15;
+        int maxMediumQuarterlyCostToIncrease = maxMediumLoanGain/15;
     
-        int minLargeLoanGain = (currentFund/2) + ( (currentFund/5) * -5);
+        int minLargeLoanGain = (currentFund/2) + ( (currentFund/5) * 0);
         int maxLargeLoanGain = (currentFund/2) + ( (currentFund/5) * 5);
-        int minLargeQuarterlyCostToIncrease = minLargeLoanGain/4;
-        int maxLargeQuarterlyCostToIncrease = maxLargeLoanGain/4;
+        int minLargeQuarterlyCostToIncrease = minLargeLoanGain/5;
+        int maxLargeQuarterlyCostToIncrease = maxLargeLoanGain/5;
 
         smallLoanMoneyToReceiveDisplay.text = "Money to Receive: $" + minSmallLoanGain.ToString() + " to $" + maxSmallLoanGain.ToString();
         mediumLoanMoneyToReceiveDisplay.text = "Money to Receive: $" + minMediumLoanGain.ToString() + " to $" + maxMediumLoanGain.ToString();
@@ -152,23 +155,23 @@ public class GameManager : MonoBehaviour
         //choice 1 -low money
         if (loanChoice == 1)
         {
-            randFactor = Random.Range(-10,11); //picks random int from between -10 and 10
+            randFactor = Random.Range(0,12); //picks random int from between 0 and 11
             moneyToRecieve = (currentFund/2) + ( (currentFund/100) * randFactor);
-            quarterlyCostToIncrease = moneyToRecieve/20;
+            quarterlyCostToIncrease = moneyToRecieve/30;
         }
         //choice 2 -medium money
         if (loanChoice == 2)
         {
-            randFactor = Random.Range(-10,11); //picks random int from between -10 and 10
+            randFactor = Random.Range(10,21); //picks random int from between 10 and 20
             moneyToRecieve = (currentFund/2) + ( (currentFund/25) * randFactor);
-            quarterlyCostToIncrease = moneyToRecieve/10;
+            quarterlyCostToIncrease = moneyToRecieve/15;
         }
         //choice 3 -high money
         if (loanChoice == 3)
         {
-            randFactor = Random.Range(-5,6); //picks random int from between -5 and 5
+            randFactor = Random.Range(0,6); //picks random int from between 0 and 5
             moneyToRecieve = (currentFund/2) + ( (currentFund/5) * randFactor);
-            quarterlyCostToIncrease = moneyToRecieve/4;
+            quarterlyCostToIncrease = moneyToRecieve/5;
         }
         currentFund += moneyToRecieve;
         currentLost += quarterlyCostToIncrease;
@@ -182,13 +185,14 @@ public class GameManager : MonoBehaviour
     }
 
     public void CalculateInvestmentChances() {
-        int baseValue = 50 + turnCount * (Random.Range(1, 7)) + (currentLost/150); //value is modified by turnCount * + or - 5%
-
-        smallInvestMoneyToInvest = baseValue/2;
+        randModifier = Random.Range(1, 7);
+        baseValue = 50 + ( (5 * turnCount) * randModifier ) + (currentLost/150); //value that all investments use and scales overtime with turn count.
+        
+        smallInvestMoneyToInvest = baseValue / 2;
         mediumInvestMoneyToInvest = baseValue * 15;
         largeInvestMoneyToInvest = baseValue * 50;
 
-        int maxSmallInvestMoneyToReceive = baseValue * 6;
+        int maxSmallInvestMoneyToReceive = baseValue * 8;
         int maxMediumInvestMoneyToReceive = baseValue * (19 + 12);
         int maxLargeInvestMoneyToReceive = baseValue * (65 + 16);
 
@@ -208,9 +212,6 @@ public class GameManager : MonoBehaviour
         int moneyToRecieve = 0;
         int moneyToInvest = 0;
         int randChoice = 0;
-        int baseValue = 50; //value that all investments use and scales overtime with turn count.
-
-        baseValue = 50 + turnCount * (Random.Range(1, 7)) + (currentLost/150); //value is modified by turnCount * + or - 5%
 
         //spends players money for that month, but has change to make a return on invetsment (ROI)
         if (investChoice == 1)
@@ -220,7 +221,7 @@ public class GameManager : MonoBehaviour
             {
                 //choice 1.1 - low money invested, low returns, completely safe (100% returns)
                 moneyToInvest = baseValue / 2;
-                moneyToRecieve = baseValue * Random.Range(1,4);
+                moneyToRecieve = baseValue * Random.Range(1,6);
 
             }
             else //10% of the time
@@ -229,7 +230,7 @@ public class GameManager : MonoBehaviour
                 moneyToInvest = baseValue / 2;
                 randFactor = Random.Range(1,101);
                     if (randFactor <= 90) {
-                        moneyToRecieve = baseValue * Random.Range(3,6);
+                        moneyToRecieve = baseValue * Random.Range(3,9);
                     }
                     else {
                         moneyToRecieve = 0;
@@ -452,6 +453,8 @@ public class GameManager : MonoBehaviour
             currentFund = currentFund - currentLost;
             loanChoice = 0;
             turnCount++;
+            CalculateLoanChances();
+            CalculateInvestmentChances();
 
             //if we have made it to turn 80... pop up win screen!
             if (turnCount%(NUMBER_OF_YEARS_TO_WIN*4)==0)
