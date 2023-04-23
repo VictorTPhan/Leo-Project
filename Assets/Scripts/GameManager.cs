@@ -49,6 +49,8 @@ public class GameManager : MonoBehaviour
     public int mediumInvestMoneyToInvest;
     public int largeInvestMoneyToInvest;
 
+    public TextMeshProUGUI yearDisplay;
+
     //handles preventing player from taking infinite loans;
     int loanCooldown = 3;
     int lCTimer = 0; //loan cooldown timer
@@ -87,6 +89,7 @@ public class GameManager : MonoBehaviour
         moneyMadeDisplay.gameObject.SetActive(false);
         moneyLostDisplay.gameObject.SetActive(false);
         nextChoiceDisplay.gameObject.SetActive(false);
+        yearDisplay.gameObject.SetActive(false);
 
         CalculateLoanChances();
         CalculateInvestmentChances();
@@ -457,17 +460,20 @@ public class GameManager : MonoBehaviour
             CalculateInvestmentChances();
 
             //if we have made it to turn 80... pop up win screen!
-            if (turnCount%(NUMBER_OF_YEARS_TO_WIN*4)==0)
+            if ((turnCount-1)%(NUMBER_OF_YEARS_TO_WIN*4)==0)
             {
                 winScreen.SetActive(true);
+                yearDisplay.gameObject.SetActive(true);
             }
 
             //if our money is reduced to 0, we lose.
             if (currentFund <= 0) 
             {
                 loseScreen.SetActive(true);
+                yearDisplay.gameObject.SetActive(true);
             }
 
+            yearDisplay.text = (turnCount%(NUMBER_OF_YEARS_TO_WIN*4)).ToString() + " years";
         }
         else
         {
